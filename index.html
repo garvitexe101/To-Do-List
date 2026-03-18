@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Momentum Tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Standalone productivity workspace</p>
+        <h1>Momentum Tasks</h1>
+        <p class="hero-copy">
+          Capture, prioritize, schedule, search, review, and persist everything locally in one responsive interface.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="themeToggle" class="ghost-button" type="button">Toggle density</button>
+        <button id="exportButton" class="ghost-button" type="button">Export JSON</button>
+        <label class="ghost-button import-button" for="importInput">Import JSON</label>
+        <input id="importInput" type="file" accept="application/json" hidden>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="panel composer-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Create task</p>
+            <h2>Plan work deliberately</h2>
+          </div>
+          <span class="panel-badge">Local-first</span>
+        </div>
+
+        <form id="taskForm" class="task-form">
+          <label>
+            <span>Task title</span>
+            <input id="taskTitle" name="title" type="text" maxlength="120" placeholder="Ship landing page revisions" required>
+          </label>
+
+          <label class="full-width">
+            <span>Notes</span>
+            <textarea id="taskNotes" name="notes" rows="4" maxlength="600" placeholder="Add any context, checklists, or delivery notes"></textarea>
+          </label>
+
+          <label>
+            <span>Category</span>
+            <input id="taskCategory" name="category" type="text" maxlength="40" placeholder="Work, Personal, Health">
+          </label>
+
+          <label>
+            <span>Tags</span>
+            <input id="taskTags" name="tags" type="text" maxlength="120" placeholder="frontend, urgent, sprint-4">
+          </label>
+
+          <label>
+            <span>Priority</span>
+            <select id="taskPriority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Due date</span>
+            <input id="taskDueDate" name="dueDate" type="date">
+          </label>
+
+          <label>
+            <span>Estimated minutes</span>
+            <input id="taskEstimate" name="estimate" type="number" min="0" max="1440" step="5" placeholder="45">
+          </label>
+
+          <label class="checkbox-field">
+            <input id="taskFlagged" name="flagged" type="checkbox">
+            <span>Pin as important</span>
+          </label>
+
+          <div class="form-actions full-width">
+            <button class="primary-button" type="submit">Add task</button>
+            <button id="resetFormButton" class="ghost-button" type="button">Reset form</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel overview-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Overview</p>
+            <h2>Track momentum</h2>
+          </div>
+        </div>
+
+        <div id="statsGrid" class="stats-grid"></div>
+
+        <div class="progress-card">
+          <div class="progress-copy">
+            <span>Completion rate</span>
+            <strong id="completionLabel">0%</strong>
+          </div>
+          <div class="progress-track">
+            <div id="completionBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button id="completeAllButton" class="ghost-button" type="button">Complete visible</button>
+          <button id="clearCompletedButton" class="ghost-button danger-button" type="button">Clear completed</button>
+        </div>
+      </section>
+
+      <section class="panel control-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Focus view</p>
+            <h2>Filter the list</h2>
+          </div>
+        </div>
+
+        <div class="view-switches" id="viewSwitches">
+          <button class="view-chip active" data-view="all" type="button">All</button>
+          <button class="view-chip" data-view="today" type="button">Today</button>
+          <button class="view-chip" data-view="upcoming" type="button">Upcoming</button>
+          <button class="view-chip" data-view="flagged" type="button">Flagged</button>
+          <button class="view-chip" data-view="completed" type="button">Completed</button>
+        </div>
+
+        <div class="filter-grid">
+          <label class="full-width">
+            <span>Search</span>
+            <input id="searchInput" type="search" placeholder="Search title, notes, category, tags">
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Priority</span>
+            <select id="priorityFilter">
+              <option value="all">All priorities</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Category</span>
+            <select id="categoryFilter">
+              <option value="all">All categories</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sort by</span>
+            <select id="sortBy">
+              <option value="smart">Smart order</option>
+              <option value="dueSoon">Due soon</option>
+              <option value="priorityHigh">Priority high to low</option>
+              <option value="createdNewest">Newest first</option>
+              <option value="alphabetical">Alphabetical</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel list-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Tasks</p>
+            <h2 id="listHeading">All tasks</h2>
+          </div>
+          <span id="resultCount" class="panel-badge">0 items</span>
+        </div>
+
+        <div id="taskList" class="task-list" aria-live="polite"></div>
+      </section>
+
+      <aside class="panel detail-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Inspector</p>
+            <h2>Selected task</h2>
+          </div>
+        </div>
+
+        <div id="detailEmpty" class="detail-empty">
+          <p>Select a task to edit details, update notes, or review its metadata.</p>
+        </div>
+
+        <form id="detailForm" class="detail-form hidden">
+          <label>
+            <span>Title</span>
+            <input id="detailTitle" name="title" type="text" maxlength="120" required>
+          </label>
+
+          <label class="full-width">
+            <span>Notes</span>
+            <textarea id="detailNotes" name="notes" rows="6" maxlength="600"></textarea>
+          </label>
+
+          <label>
+            <span>Category</span>
+            <input id="detailCategory" name="category" type="text" maxlength="40">
+          </label>
+
+          <label>
+            <span>Tags</span>
+            <input id="detailTags" name="tags" type="text" maxlength="120">
+          </label>
+
+          <label>
+            <span>Priority</span>
+            <select id="detailPriority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Due date</span>
+            <input id="detailDueDate" name="dueDate" type="date">
+          </label>
+
+          <label>
+            <span>Estimated minutes</span>
+            <input id="detailEstimate" name="estimate" type="number" min="0" max="1440" step="5">
+          </label>
+
+          <label class="checkbox-field">
+            <input id="detailFlagged" name="flagged" type="checkbox">
+            <span>Keep pinned</span>
+          </label>
+
+          <div class="detail-meta" id="detailMeta"></div>
+
+          <div class="form-actions full-width">
+            <button class="primary-button" type="submit">Save changes</button>
+            <button id="deleteSelectedButton" class="ghost-button danger-button" type="button">Delete task</button>
+          </div>
+        </form>
+      </aside>
+    </main>
+  </div>
+
+  <template id="taskItemTemplate">
+    <article class="task-card">
+      <div class="task-main">
+        <label class="check-wrap">
+          <input class="task-toggle" type="checkbox">
+          <span class="custom-check"></span>
+        </label>
+        <div class="task-copy">
+          <div class="task-line">
+            <h3 class="task-title"></h3>
+            <button class="flag-button" type="button" aria-label="Toggle important">Pin</button>
+          </div>
+          <p class="task-notes"></p>
+          <div class="task-meta"></div>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="mini-button edit-button" type="button">Edit</button>
+        <button class="mini-button delete-button" type="button">Delete</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
